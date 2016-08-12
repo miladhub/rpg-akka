@@ -37,6 +37,9 @@ class SimplisticHandler extends Actor {
       if (command.startsWith("bye.")) {
         sender() ! Write(ByteString("> bye!"))
         sender() ! Close
+      } else if (command.startsWith("enter as ")) {
+        val character = command.substring("enter as".length + 1)
+        sender() ! Write(ByteString("> welcome, " + character + "!"))
       } else {
         sender() ! Write(ByteString("> " + command))
       }
