@@ -31,6 +31,7 @@ class Server extends Actor {
 }
 
 class SimplisticHandler extends Actor {
+  var character: String = _
 
   import Tcp._
 
@@ -43,6 +44,10 @@ class SimplisticHandler extends Actor {
       } else if (command.startsWith("enter as ")) {
         val character = command.substring("enter as ".length).trim
         sender() ! Write(ByteString("> welcome, " + character + "!\n"))
+        this.character = character
+      } else if (command.startsWith("who am i")) {
+        sender() ! Write(ByteString("> your name is " + character + ".\n"))
+        this.character = character
       } else {
         sender() ! Write(ByteString("> " + command))
       }

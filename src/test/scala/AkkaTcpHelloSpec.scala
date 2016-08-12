@@ -42,5 +42,15 @@ class AkkaTcpHelloSpec(_system: ActorSystem)
       handler ! Received(ByteString("enter as John\n"))
       expectMsg(Write(ByteString("> welcome, John!\n")))
     }
+
+    "remember the character" in {
+      val handler = system.actorOf(Props[SimplisticHandler])
+
+      handler ! Received(ByteString("enter as John\n"))
+      expectMsg(Write(ByteString("> welcome, John!\n")))
+
+      handler ! Received(ByteString("who am i\n"))
+      expectMsg(Write(ByteString("> your name is John.\n")))
+    }
   }
 }
