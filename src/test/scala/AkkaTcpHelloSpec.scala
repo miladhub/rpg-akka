@@ -31,7 +31,7 @@ class AkkaTcpHelloSpec(_system: ActorSystem)
     "close the connection when saying bye" in {
       val handler = system.actorOf(Props[SimplisticHandler])
 
-      handler ! Received(ByteString("bye"))
+      handler ! Received(ByteString("bye."))
       expectMsg(Write(ByteString("> bye!")))
       expectMsg(Close)
     }
