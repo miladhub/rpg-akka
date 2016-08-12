@@ -10,18 +10,19 @@ object AkkaTcpHello extends App {
 }
 
 class Server extends Actor {
+
   import Tcp._
   import context.system
 
   IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 6789))
 
   def receive = {
-    case b @ Bound(localAddress) =>
+    case b@Bound(localAddress) =>
       println("bound at address" + localAddress)
 
     case CommandFailed(_: Bind) => context stop self
 
-    case c @ Connected(remote, local) =>
+    case c@Connected(remote, local) =>
       println("client connected from " + remote)
       val handler = context.actorOf(Props[SimplisticHandler])
       val connection = sender()
@@ -30,7 +31,9 @@ class Server extends Actor {
 }
 
 class SimplisticHandler extends Actor {
+
   import Tcp._
+
   def receive = {
     case Received(data) =>
       val command = data.decodeString("UTF-8")
@@ -43,7 +46,7 @@ class SimplisticHandler extends Actor {
       } else {
         sender() ! Write(ByteString("> " + command))
       }
-    case PeerClosed    =>
+    case PeerClosed =>
       println("client disconnected")
       context stop self
   }
