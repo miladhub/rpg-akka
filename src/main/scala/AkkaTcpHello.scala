@@ -35,11 +35,11 @@ class SimplisticHandler extends Actor {
     case Received(data) =>
       val command = data.decodeString("UTF-8")
       if (command.startsWith("bye.")) {
-        sender() ! Write(ByteString("> bye!"))
+        sender() ! Write(ByteString("> bye!\n"))
         sender() ! Close
       } else if (command.startsWith("enter as ")) {
-        val character = command.substring("enter as".length + 1)
-        sender() ! Write(ByteString("> welcome, " + character + "!"))
+        val character = command.substring("enter as ".length).trim
+        sender() ! Write(ByteString("> welcome, " + character + "!\n"))
       } else {
         sender() ! Write(ByteString("> " + command))
       }
