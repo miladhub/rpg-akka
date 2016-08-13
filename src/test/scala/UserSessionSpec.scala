@@ -36,6 +36,13 @@ class UserSessionSpec(_system: ActorSystem)
       expectMsg(Write(ByteString("> Welcome, John!\n")))
     }
 
+    "say what to unknown commands" in {
+      val handler = system.actorOf(UserSession.props(testActor))
+
+      handler ! Received(ByteString("foobar\n"))
+      expectMsg(Write(ByteString("> I'm sorry, what?\n")))
+    }
+
     "remember the character" in {
       val handler = system.actorOf(UserSession.props(testActor))
 
