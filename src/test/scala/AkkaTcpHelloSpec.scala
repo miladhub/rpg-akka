@@ -21,36 +21,29 @@ class AkkaTcpHelloSpec(_system: ActorSystem)
   }
 
   "the client handler" should {
-    "repeat what the client says" in {
-      val handler = TestActorRef(Props[SimplisticHandler])
-
-      handler ! Received(ByteString("hello"))
-      expectMsg(Write(ByteString("> hello")))
-    }
-
     "close the connection when saying bye" in {
-      val handler = system.actorOf(Props[SimplisticHandler])
+      val handler = system.actorOf(UserSession.props(testActor))
 
       handler ! Received(ByteString("bye."))
-      expectMsg(Write(ByteString("> bye!\n")))
+      expectMsg(Write(ByteString("> Bye!\n")))
       expectMsg(Close)
     }
 
     "welcome characters as they enter" in {
-      val handler = system.actorOf(Props[SimplisticHandler])
+      val handler = system.actorOf(UserSession.props(testActor))
 
       handler ! Received(ByteString("enter as John\n"))
-      expectMsg(Write(ByteString("> welcome, John!\n")))
+      expectMsg(Write(ByteString("> Welcome, John!\n")))
     }
 
     "remember the character" in {
-      val handler = system.actorOf(Props[SimplisticHandler])
+      val handler = system.actorOf(UserSession.props(testActor))
 
       handler ! Received(ByteString("enter as John\n"))
-      expectMsg(Write(ByteString("> welcome, John!\n")))
+      expectMsg(Write(ByteString("> Welcome, John!\n")))
 
       handler ! Received(ByteString("who am i\n"))
-      expectMsg(Write(ByteString("> your name is John.\n")))
+      expectMsg(Write(ByteString("> Your name is John.\n")))
     }
   }
 }
