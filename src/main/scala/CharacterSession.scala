@@ -1,9 +1,9 @@
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, ActorRef, Props}
 
 object CharacterSession {
   case class CharacterResponse(contents: String)
   case class WhoAmI()
-  def props(character: String) = Props(new CharacterSession(character))
+  def props(character: String, userSession: ActorRef) = Props(new CharacterSession(character, userSession))
   def parse(command: String): Option[Any] =
     if (command.startsWith("who am i"))
       Some(WhoAmI)
@@ -11,10 +11,10 @@ object CharacterSession {
       None
 }
 
-class CharacterSession(character: String) extends Actor {
+class CharacterSession(character: String, userSession: ActorRef) extends Actor {
   import CharacterSession._
 
   def receive = {
-    case WhoAmI => sender() ! CharacterResponse("Your name is " + character + ".")
+    case WhoAmI => userSession ! CharacterResponse("Your name is " + character + ".")
   }
 }

@@ -21,7 +21,7 @@ class UserSession(connection: ActorRef) extends Actor {
       } else if (command.startsWith("enter as ")) {
         val character = command.substring("enter as ".length).trim
         connection ! Write(ByteString("> Welcome, " + character + "!\n"))
-        this.characterSession = context.actorOf(CharacterSession.props(character))
+        this.characterSession = context.actorOf(CharacterSession.props(character, self))
       } else {
         CharacterSession.parse(command) match {
           case Some(msg) => this.characterSession ! msg

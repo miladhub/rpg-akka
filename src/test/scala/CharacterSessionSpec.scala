@@ -21,7 +21,7 @@ class CharacterSessionSpec(_system: ActorSystem)
 
   "the character session" should {
     "say who the character is" in {
-      val charSession = system.actorOf(CharacterSession.props("John"))
+      val charSession = system.actorOf(CharacterSession.props("John", testActor))
 
       charSession ! WhoAmI
       expectMsg(CharacterResponse("Your name is John."))
