@@ -7,14 +7,14 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class AkkaTcpHelloSpec(_system: ActorSystem)
+class UserSessionSpec(_system: ActorSystem)
   extends TestKit(_system)
     with WordSpecLike
     with ImplicitSender
     with Matchers
     with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem("AkkaTcpHello"))
+  def this() = this(ActorSystem("AkkaTcpRpg"))
 
   override def afterAll: Unit = {
     Await.result(system.terminate(), 10.seconds)
