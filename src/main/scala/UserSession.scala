@@ -16,22 +16,26 @@ class UserSession(connection: ActorRef) extends Actor {
     case Received(data) =>
       val command = data.decodeString("UTF-8")
       if (command.startsWith("bye.")) {
-        connection ! Write(ByteString("> Bye!\n"))
+        write("Bye!")
         connection ! Close
       } else if (command.startsWith("enter as ")) {
         val character = command.substring("enter as ".length).trim
-        connection ! Write(ByteString("> Welcome, " + character + "!\n"))
+        write(s"Welcome, $character!")
         this.characterSession = context.actorOf(CharacterSession.props(character, self))
       } else {
         CharacterSession.parse(command) match {
           case Some(msg) => this.characterSession ! msg
-          case None => connection ! Write(ByteString("> I'm sorry, what?\n"))
+          case None => write("I'm sorry, what?")
         }
       }
     case CharacterResponse(contents: String) =>
-      connection ! Write(ByteString("> " + contents + "\n"))
+      connection ! write(contents)
     case PeerClosed =>
       println("Client disconnected")
       context stop self
+  }
+
+  def write(contents: String) = {
+    connection ! Write(ByteString("> " + contents + "\n"))
   }
 }
