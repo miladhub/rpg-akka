@@ -15,6 +15,6 @@ class CharacterSession(character: String, userSession: ActorRef) extends Actor {
   import CharacterSession._
 
   def receive = {
-    case WhoAmI => userSession ! CharacterResponse("Your name is " + character + ".")
+    case WhoAmI => userSession ! CharacterResponse(s"Your name is $character.")
   }
 }
