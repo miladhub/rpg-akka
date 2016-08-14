@@ -1,6 +1,7 @@
-import CharacterSession.{CharacterResponse, WhoAmI}
-import akka.actor.ActorSystem
+import akkarpg.game.CharacterSession.{CharacterResponse, WhoAmI}
+import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
+import akkarpg.game.{CharacterSession, Game}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.Await
@@ -21,7 +22,8 @@ class CharacterSessionSpec(_system: ActorSystem)
 
   "the character session" should {
     "say who the character is" in {
-      val charSession = system.actorOf(CharacterSession.props("John", testActor))
+      val game = system.actorOf(Props[Game])
+      val charSession = system.actorOf(CharacterSession.props("John", testActor, game))
 
       charSession ! WhoAmI
       expectMsg(CharacterResponse("Your name is John."))

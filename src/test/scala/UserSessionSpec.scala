@@ -1,7 +1,7 @@
-import akka.actor.ActorSystem
-import akka.io.Tcp.{Close, Received, Write}
-import akka.testkit.{ImplicitSender, TestKit}
-import akka.util.ByteString
+import akka.actor.{ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import akkarpg.game.UserSession.{UserCommand, UserResponse, UserSessionEnded}
+import akkarpg.game.{Game, UserSession}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.concurrent.Await
@@ -21,36 +21,44 @@ class UserSessionSpec(_system: ActorSystem)
   }
 
   "the user session" should {
-    "close the connection when saying bye" in {
-      val userSession = system.actorOf(UserSession.props(testActor))
+    "end when the user says bye" in {
+      val game = system.actorOf(Props[Game])
 
-      userSession ! Received(ByteString("bye."))
-      expectMsg(Write(ByteString("> Bye!\n")))
-      expectMsg(Close)
+      val userSession = system.actorOf(UserSession.props(testActor, game))
+
+      userSession ! UserCommand("bye.")
+      expectMsg(UserResponse("Bye!"))
+      expectMsg(UserSessionEnded)
     }
 
     "welcome characters as they enter" in {
-      val userSession = system.actorOf(UserSession.props(testActor))
+      val game = system.actorOf(Props[Game])
 
-      userSession ! Received(ByteString("enter as John\n"))
-      expectMsg(Write(ByteString("> Welcome, John!\n")))
+      val userSession = system.actorOf(UserSession.props(testActor, game))
+
+      userSession ! UserCommand("enter as John")
+      expectMsg(UserResponse("Welcome, John!"))
     }
 
     "say what to unknown commands" in {
-      val userSession = system.actorOf(UserSession.props(testActor))
+      val game = system.actorOf(Props[Game])
 
-      userSession ! Received(ByteString("foobar\n"))
-      expectMsg(Write(ByteString("> I'm sorry, what?\n")))
+      val userSession = system.actorOf(UserSession.props(testActor, game))
+
+      userSession ! UserCommand("foobar")
+      expectMsg(UserResponse("I'm sorry, what?"))
     }
 
     "remember the character" in {
-      val userSession = system.actorOf(UserSession.props(testActor))
+      val game = system.actorOf(Props[Game])
 
-      userSession ! Received(ByteString("enter as John\n"))
-      expectMsg(Write(ByteString("> Welcome, John!\n")))
+      val userSession = system.actorOf(UserSession.props(testActor, game))
 
-      userSession ! Received(ByteString("who am i\n"))
-      expectMsg(Write(ByteString("> Your name is John.\n")))
+      userSession ! UserCommand("enter as John")
+      expectMsg(UserResponse("Welcome, John!"))
+
+      userSession ! UserCommand("who am i")
+      expectMsg(UserResponse("Your name is John."))
     }
   }
 }

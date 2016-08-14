@@ -1,18 +1,17 @@
+package akkarpg.tcp
+
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, Props}
 import akka.io.{IO, Tcp}
-
-object AkkaTcpRpg extends App {
-  val system = ActorSystem("AkkaTcpRpg")
-  val server = system.actorOf(Props[AkkaTcpRpgServer], "AkkaTcpRpgServer")
-}
+import akkarpg.game.Game
 
 class AkkaTcpRpgServer extends Actor {
   import Tcp._
   import context.system
 
   IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 6789))
+  val game = system.actorOf(Props[Game])
 
   def receive = {
     case b@Bound(localAddress) =>
@@ -23,7 +22,7 @@ class AkkaTcpRpgServer extends Actor {
     case c@Connected(remote, local) =>
       println("Client connected from " + remote)
       val connection = sender()
-      val handler = context.actorOf(UserSession.props(connection))
+      val handler = context.actorOf(ConnectionHandler.props(connection, game))
       connection ! Register(handler)
   }
 }
