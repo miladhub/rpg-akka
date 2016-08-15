@@ -25,6 +25,8 @@ object UserSession {
       EnterAs(character)
     } else if (command.startsWith("bye.")) {
       Bye
+    } else if (command.startsWith("who am i")) {
+      WhoAmI
     } else {
       Game.parseRequest(command) match {
         case Some(msg) => msg
@@ -47,7 +49,7 @@ class UserSession(connectionHandler: ActorRef, game: ActorRef) extends Actor {
       } else {
         this.character = character
         connectionHandler ! Welcome(character)
-        game ! CharacterAdded(character, self)
+        game ! CharacterAdded(character)
       }
     case Bye =>
       connectionHandler ! Bye
