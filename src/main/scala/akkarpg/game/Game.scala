@@ -3,15 +3,18 @@ package akkarpg.game
 import akka.actor.{Actor, ActorRef}
 
 object Game {
-  def parse(command: String) =
+  def parseRequest(command: String) =
     if (command.startsWith("How many users are online?"))
       Some(HowManyUsers)
     else
       None
+
+  sealed trait GameRequest
+  case object HowManyUsers extends GameRequest
+  case class CharacterAdded(character: String, characterSession: ActorRef) extends GameRequest
+  case class CharacterRemoved(character: String) extends GameRequest
+
   case class GameResponse(contents: String)
-  case class HowManyUsers()
-  case class CharacterAdded(character: String, characterSession: ActorRef)
-  case class CharacterRemoved(character: String)
 }
 
 class Game extends Actor {

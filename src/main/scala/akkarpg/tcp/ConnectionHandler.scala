@@ -2,7 +2,7 @@ package akkarpg.tcp
 
 import akka.actor.{Actor, ActorRef, Props}
 import akkarpg.game.UserSession
-import akkarpg.game.UserSession.{UserCommand, UserResponse, UserSessionEnded}
+import akkarpg.game.UserSession.{UserRequest, UserResponse, UserSessionEnded}
 
 object ConnectionHandler {
   def props(connection: ActorRef, game: ActorRef) = Props(new ConnectionHandler(connection, game))
@@ -17,7 +17,7 @@ class ConnectionHandler(connection: ActorRef, game: ActorRef) extends Actor {
   def receive = {
     case Received(data) =>
       val command = data.decodeString("UTF-8")
-      userSession ! UserCommand(command)
+      userSession ! UserSession.parseRequest(command)
     case UserResponse(contents: String) =>
       connection ! Write(ByteString("> " + contents + "\n"))
     case UserSessionEnded =>
