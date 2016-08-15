@@ -1,6 +1,7 @@
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
-import akkarpg.game.UserSession.{UserCommand, UserResponse, UserSessionEnded}
+import akkarpg.game.CharacterSession.YourNameIs
+import akkarpg.game.UserSession._
 import akkarpg.game.{Game, UserSession}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
@@ -27,7 +28,7 @@ class UserSessionSpec(_system: ActorSystem)
       val userSession = system.actorOf(UserSession.props(testActor, game))
 
       userSession ! UserCommand("bye.")
-      expectMsg(UserResponse("Bye!"))
+      expectMsg(Bye)
       expectMsg(UserSessionEnded)
     }
 
@@ -37,7 +38,19 @@ class UserSessionSpec(_system: ActorSystem)
       val userSession = system.actorOf(UserSession.props(testActor, game))
 
       userSession ! UserCommand("enter as John")
-      expectMsg(UserResponse("Welcome, John!"))
+      expectMsg(Welcome("John"))
+    }
+
+    "disallow entering twice" in {
+      val game = system.actorOf(Props[Game])
+
+      val userSession = system.actorOf(UserSession.props(testActor, game))
+
+      userSession ! UserCommand("enter as John")
+      expectMsg(Welcome("John"))
+
+      userSession ! UserCommand("enter as John")
+      expectMsg(AlreadyInGame)
     }
 
     "say what to unknown commands" in {
@@ -46,19 +59,7 @@ class UserSessionSpec(_system: ActorSystem)
       val userSession = system.actorOf(UserSession.props(testActor, game))
 
       userSession ! UserCommand("foobar")
-      expectMsg(UserResponse("I'm sorry, what?"))
-    }
-
-    "remember the character" in {
-      val game = system.actorOf(Props[Game])
-
-      val userSession = system.actorOf(UserSession.props(testActor, game))
-
-      userSession ! UserCommand("enter as John")
-      expectMsg(UserResponse("Welcome, John!"))
-
-      userSession ! UserCommand("who am i")
-      expectMsg(UserResponse("Your name is John."))
+      expectMsg(ImSorryWhat)
     }
   }
 }

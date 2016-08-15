@@ -1,6 +1,6 @@
-import akkarpg.game.CharacterSession.{CharacterResponse, WhoAmI}
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
+import akkarpg.game.CharacterSession.{WhoAmI, YourNameIs}
 import akkarpg.game.{CharacterSession, Game}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
@@ -26,7 +26,7 @@ class CharacterSessionSpec(_system: ActorSystem)
       val charSession = system.actorOf(CharacterSession.props("John", testActor, game))
 
       charSession ! WhoAmI
-      expectMsg(CharacterResponse("Your name is John."))
+      expectMsg(YourNameIs("John"))
     }
   }
 }

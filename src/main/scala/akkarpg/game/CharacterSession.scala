@@ -6,6 +6,8 @@ object CharacterSession {
   case class CharacterResponse(contents: String)
   case class WhoAmI()
   case class CharacterLeaving()
+  object YourNameIs { def apply(name: String) = new YourNameIs(name) }
+  class YourNameIs(name: String) extends CharacterResponse(s"Your name is $name.")
   def props(character: String, userSession: ActorRef, game: ActorRef) =
     Props(new CharacterSession(character, userSession, game))
   def parse(command: String): Option[Any] =
@@ -20,7 +22,7 @@ class CharacterSession(character: String, userSession: ActorRef, game: ActorRef)
   import Game._
 
   def receive = {
-    case WhoAmI => userSession ! CharacterResponse(s"Your name is $character.")
+    case WhoAmI => userSession ! YourNameIs(character)
     case CharacterLeaving => game ! CharacterRemoved(character)
   }
 }
