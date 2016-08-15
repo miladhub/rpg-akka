@@ -5,7 +5,8 @@ import akka.actor.{Actor, ActorRef, Props}
 object UserSession {
   def props(connectionHandler: ActorRef, game: ActorRef) = Props(new UserSession(connectionHandler, game))
 
-  case class UserRequest(command: String)
+  sealed trait UserRequest
+  case object WhoAmI extends UserRequest
 
   case class UserResponse(command: String)
   object Bye extends UserResponse("Bye!")
@@ -13,6 +14,8 @@ object UserSession {
   class Welcome(who: String) extends UserResponse(s"Welcome, $who!")
   object AlreadyInGame extends UserResponse("Already in game.")
   object ImSorryWhat extends UserResponse("I'm sorry, what?")
+  object YourNameIs { def apply(name: String) = new YourNameIs(name) }
+  class YourNameIs(name: String) extends UserResponse(s"Your name is $name.")
 
   case class UserSessionEnded()
   case class EnterAs(character: String)
@@ -25,44 +28,38 @@ object UserSession {
     } else {
       Game.parseRequest(command) match {
         case Some(msg) => msg
-        case None => CharacterSession.parseRequest(command) match {
-          case Some(msg) => msg
-          case None =>
-        }
+        case None =>
       }
     }
   }
 }
 
 class UserSession(connectionHandler: ActorRef, game: ActorRef) extends Actor {
-  var characterSession: ActorRef = _
+  var character: String = _
 
-  import CharacterSession._
   import Game._
   import UserSession._
 
   def receive = {
     case EnterAs(character: String) =>
-      if (characterSession != null) {
+      if (this.character != null) {
         connectionHandler ! AlreadyInGame
       } else {
+        this.character = character
         connectionHandler ! Welcome(character)
-        characterSession = context.actorOf(CharacterSession.props(character, self, game))
-        game ! CharacterAdded(character, characterSession)
+        game ! CharacterAdded(character, self)
       }
     case Bye =>
       connectionHandler ! Bye
-      if (characterSession != null)
-        characterSession ! CharacterLeaving
+      if (character != null)
+        game ! CharacterRemoved(character)
       connectionHandler ! UserSessionEnded
     case msg: GameRequest =>
       game ! msg
-    case msg: CharacterRequest =>
-      characterSession ! msg
-    case CharacterResponse(contents: String) =>
-      connectionHandler ! UserResponse(contents)
     case GameResponse(contents: String) =>
       connectionHandler ! UserResponse(contents)
+    case WhoAmI =>
+      connectionHandler ! YourNameIs(character)
     case _ =>
       connectionHandler ! ImSorryWhat
   }

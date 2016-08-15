@@ -57,8 +57,20 @@ class UserSessionSpec(_system: ActorSystem)
 
       val userSession = system.actorOf(UserSession.props(testActor, game))
 
-      userSession ! UserRequest("foobar")
+      userSession ! "foobar"
       expectMsg(ImSorryWhat)
+    }
+
+    "say who the character is" in {
+      val game = system.actorOf(Props[Game])
+
+      val userSession = system.actorOf(UserSession.props(testActor, game))
+
+      userSession ! EnterAs("John")
+      expectMsg(Welcome("John"))
+
+      userSession ! WhoAmI
+      expectMsg(YourNameIs("John"))
     }
   }
 }
