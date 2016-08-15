@@ -3,7 +3,7 @@ package akkarpg.game
 import akka.actor.{Actor, ActorRef}
 
 object Game {
-  def parseRequest(command: String) =
+  def gameRequest(command: String) =
     if (command.startsWith("How many users are online?"))
       Some(HowManyUsers)
     else

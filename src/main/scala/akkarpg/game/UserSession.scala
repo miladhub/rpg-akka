@@ -19,7 +19,7 @@ object UserSession {
 
   case object UserSessionEnded
   case class EnterAs(character: String)
-  def parseRequest(command: String) = {
+  def userRequest(command: String) = {
     if (command.startsWith("enter as ")) {
       val character = command.substring("enter as ".length).trim
       EnterAs(character)
@@ -28,7 +28,7 @@ object UserSession {
     } else if (command.startsWith("who am i")) {
       WhoAmI
     } else {
-      Game.parseRequest(command) match {
+      Game.gameRequest(command) match {
         case Some(msg) => msg
         case None =>
       }
@@ -37,32 +37,36 @@ object UserSession {
 }
 
 class UserSession(connectionHandler: ActorRef, game: ActorRef) extends Actor {
-  var character: String = _
+  var character: Option[String] = None
 
   import Game._
   import UserSession._
 
   def receive = {
     case EnterAs(character: String) =>
-      if (this.character != null) {
+      if (inGame) {
         connectionHandler ! AlreadyInGame
       } else {
-        this.character = character
+        this.character = Some(character)
         connectionHandler ! Welcome(character)
         game ! CharacterAdded(character)
       }
     case Bye =>
+      if (inGame)
+        game ! CharacterRemoved(character.get)
       connectionHandler ! Bye
-      if (character != null)
-        game ! CharacterRemoved(character)
       connectionHandler ! UserSessionEnded
     case msg: GameRequest =>
       game ! msg
     case GameResponse(contents: String) =>
       connectionHandler ! UserResponse(contents)
     case WhoAmI =>
-      connectionHandler ! YourNameIs(character)
+      connectionHandler ! YourNameIs(character.get)
     case _ =>
       connectionHandler ! ImSorryWhat
+  }
+
+  def inGame = {
+    this.character.isDefined
   }
 }
