@@ -17,7 +17,7 @@ object UserSession {
   object YourNameIs { def apply(name: String) = new YourNameIs(name) }
   class YourNameIs(name: String) extends UserResponse(s"Your name is $name.")
 
-  case class UserSessionEnded()
+  case object UserSessionEnded
   case class EnterAs(character: String)
   def parseRequest(command: String) = {
     if (command.startsWith("enter as ")) {

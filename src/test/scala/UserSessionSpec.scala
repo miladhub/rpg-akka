@@ -1,6 +1,5 @@
 import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestKit, TestProbe}
-import akkarpg.game.Game.{CharacterAdded, CharacterRemoved, HowManyUsers}
+import akka.testkit.{ImplicitSender, TestKit}
 import akkarpg.game.UserSession._
 import akkarpg.game.{Game, UserSession}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
@@ -72,36 +71,6 @@ class UserSessionSpec(_system: ActorSystem)
 
       userSession ! WhoAmI
       expectMsg(YourNameIs("John"))
-    }
-  }
-
-  "the game" should {
-    "know how many characters are in" in {
-      val john = TestProbe("john")
-      val jim = TestProbe("jim")
-
-      val game = system.actorOf(Props[Game])
-      val johnSession = system.actorOf(UserSession.props(john.testActor, game))
-      val jimSession = system.actorOf(UserSession.props(jim.testActor, game))
-
-      johnSession ! EnterAs("John")
-      jimSession ! EnterAs("Jim")
-      johnSession ! HowManyUsers
-
-      john.expectMsg(Welcome("John"))
-      john.expectMsg(UserResponse("2"))
-    }
-
-    "remove users when they go away" in {
-      val john = TestProbe("john")
-      val game = TestProbe("game")
-      val johnSession = system.actorOf(UserSession.props(john.testActor, game.testActor))
-
-      johnSession ! EnterAs("John")
-      johnSession ! Bye
-
-      game.expectMsg(CharacterAdded("John"))
-      game.expectMsg(CharacterRemoved("John"))
     }
   }
 }

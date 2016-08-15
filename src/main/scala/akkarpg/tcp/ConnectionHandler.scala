@@ -22,6 +22,7 @@ class ConnectionHandler(connection: ActorRef, game: ActorRef) extends Actor {
       connection ! Write(ByteString("> " + contents + "\n"))
     case UserSessionEnded =>
       connection ! Close
+      context stop self
     case PeerClosed =>
       println("Client disconnected")
       context stop self
