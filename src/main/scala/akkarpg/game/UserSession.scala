@@ -7,6 +7,7 @@ object UserSession {
 
   sealed trait UserRequest
   case object WhoAmI extends UserRequest
+  case object UnrecognizedRequest extends UserRequest
 
   case class UserResponse(command: String)
   object Bye extends UserResponse("Bye!")
@@ -28,9 +29,9 @@ object UserSession {
     } else if (command.startsWith("who am i")) {
       WhoAmI
     } else {
-      Game.gameRequest(command) match {
+      Game.parse(command) match {
         case Some(msg) => msg
-        case None =>
+        case None => UnrecognizedRequest
       }
     }
   }
