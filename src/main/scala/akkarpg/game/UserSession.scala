@@ -50,11 +50,11 @@ class UserSession(connectionHandler: ActorRef, game: ActorRef) extends Actor {
       } else {
         this.character = Some(character)
         connectionHandler ! Welcome(character)
-        game ! CharacterAdded(character)
+        game ! AddCharacter(character)
       }
     case Bye =>
       if (inGame)
-        game ! CharacterRemoved(character.get)
+        game ! RemoveCharacter(character.get)
       connectionHandler ! Bye
       connectionHandler ! UserSessionEnded
     case msg: GameRequest =>

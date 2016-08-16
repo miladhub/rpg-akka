@@ -11,8 +11,8 @@ object Game {
 
   sealed trait GameRequest
   case object HowManyUsers extends GameRequest
-  case class CharacterAdded(character: String) extends GameRequest
-  case class CharacterRemoved(character: String) extends GameRequest
+  case class AddCharacter(character: String) extends GameRequest
+  case class RemoveCharacter(character: String) extends GameRequest
 
   case class GameResponse(contents: String)
 }
@@ -26,9 +26,9 @@ class Game extends Actor {
     case HowManyUsers =>
       val userSession: ActorRef = sender()
       userSession ! GameResponse(characters.size.toString)
-    case CharacterAdded(character: String) =>
+    case AddCharacter(character: String) =>
       characters = characters + character
-    case CharacterRemoved(character: String) =>
+    case RemoveCharacter(character: String) =>
       characters = characters - character
   }
 }

@@ -1,6 +1,6 @@
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
-import akkarpg.game.Game.{CharacterAdded, CharacterRemoved, GameResponse, HowManyUsers}
+import akkarpg.game.Game.{AddCharacter, RemoveCharacter, GameResponse, HowManyUsers}
 import akkarpg.game.UserSession._
 import akkarpg.game.{Game, UserSession}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
@@ -46,16 +46,16 @@ class GameSpec(_system: ActorSystem)
       johnSession ! EnterAs("John")
       johnSession ! Bye
 
-      game.expectMsg(CharacterAdded("John"))
-      game.expectMsg(CharacterRemoved("John"))
+      game.expectMsg(AddCharacter("John"))
+      game.expectMsg(RemoveCharacter("John"))
     }
 
     "keep track of users" in {
       val game = system.actorOf(Props[Game])
 
-      game ! CharacterAdded("John")
-      game ! CharacterAdded("Jim")
-      game ! CharacterRemoved("John")
+      game ! AddCharacter("John")
+      game ! AddCharacter("Jim")
+      game ! RemoveCharacter("John")
       game ! HowManyUsers
 
       expectMsg(GameResponse("1"))
