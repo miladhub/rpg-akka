@@ -5,12 +5,17 @@ import java.net.InetSocketAddress
 import akka.actor.{Actor, Props}
 import akka.io.{IO, Tcp}
 import akkarpg.game.Game
+import com.typesafe.config.ConfigFactory
 
 class AkkaTcpRpgServer extends Actor {
   import Tcp._
   import context.system
 
-  IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 6789))
+  val conf = ConfigFactory.load()
+  val host = conf.getString("http.host")
+  val port = conf.getInt("http.port")
+
+  IO(Tcp) ! Bind(self, new InetSocketAddress(host, port))
   val game = system.actorOf(Props[Game])
 
   def receive = {
